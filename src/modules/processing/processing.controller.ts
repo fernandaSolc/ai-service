@@ -18,7 +18,8 @@ import { LoggingService } from '../logging/logging.service';
 import { MetricsService } from '../metrics/metrics.service';
 import { PersistenceService } from '../persistence/persistence.service';
 import { LoggingInterceptor } from '../logging/logging.interceptor';
-import { JwtAuthGuard, ApiKeyAuthGuard } from '../../common/guards/auth.guard';
+import { JwtAuthGuard } from '../../common/guards/auth.guard';
+import { ApiKeyGuard } from '../../common/guards/api-key.guard';
 import {
   ProcessRequestDto,
   ProcessResponseDto,
@@ -42,7 +43,7 @@ export class ProcessingController {
 
   @Post('process-content')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard, ApiKeyAuthGuard)
+  @UseGuards(ApiKeyGuard)
   @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 req/min
   @ApiOperation({
     summary: 'Process content with IA (sync or async)',
@@ -119,7 +120,7 @@ export class ProcessingController {
   }
 
   @Get('status/:workflowId')
-  @UseGuards(JwtAuthGuard, ApiKeyAuthGuard)
+  @UseGuards(ApiKeyGuard)
   @ApiOperation({
     summary: 'Get processing status',
     description: 'Retorna o status atual do workflow e metas básicas (raw/adapted ids).',
@@ -153,7 +154,7 @@ export class ProcessingController {
   }
 
   @Post('callback-test')
-  @UseGuards(ApiKeyAuthGuard)
+  @UseGuards(ApiKeyGuard)
   @ApiOperation({
     summary: 'Test callback (internal)',
     description: 'Endpoint para testar envio de callbacks (apenas admin).',
@@ -172,5 +173,20 @@ export class ProcessingController {
   async testCallback(@Body() testData: CallbackTestDto): Promise<{ delivered: boolean }> {
     const result = await this.callbackService.testCallback(testData.callbackUrl, testData.payload);
     return { delivered: result.success };
+  }
+
+  // Endpoint de debug para testar autenticação
+  @Get('debug-auth')
+  @UseGuards(ApiKeyGuard)
+  @ApiOperation({
+    summary: 'Debug authentication',
+    description: 'Endpoint para testar se a autenticação está funcionando.',
+  })
+  async debugAuth(): Promise<any> {
+    return {
+      message: 'Autenticação funcionando!',
+      timestamp: new Date().toISOString(),
+      status: 'success'
+    };
   }
 }

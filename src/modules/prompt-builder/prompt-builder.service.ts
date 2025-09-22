@@ -67,18 +67,26 @@ ${metadata.tags ? `- Tags: ${metadata.tags.join(', ')}` : ''}`;
    * Constrói as instruções de processamento
    */
   private buildInstructions(options?: any): string {
-    return `Analise o conteúdo educacional fornecido e retorne uma resposta estruturada em JSON com as seguintes seções:
+    return `Analise o conteúdo educacional fornecido (que pode ser um livro completo, capítulo extenso ou material didático longo) e retorne uma resposta estruturada em JSON com as seguintes seções:
 
-1. SUMMARY: Um resumo conciso do conteúdo (máximo 200 palavras)
+IMPORTANTE: Gere conteúdo EXTENSO e DETALHADO. Não limite o tamanho das respostas.
+
+1. SUMMARY: Um resumo COMPLETO e DETALHADO do conteúdo (mínimo 300 palavras, máximo 1000 palavras para grandes livros)
 2. METRICS: 
    - readabilityScore: pontuação de 0-100 baseada na legibilidade
-   - durationMin: duração estimada de leitura em minutos
+   - durationMin: duração estimada de leitura em minutos (considerando o tamanho completo)
    - coverage: percentual de cobertura dos objetivos educacionais (0-100)
 3. VIOLATIONS: Array de violações encontradas (se houver)
-4. SUGGESTIONS: Array de sugestões de melhoria
-5. QUIZ: Array de 3-5 questões de múltipla escolha sobre o conteúdo
-6. IMPROVED_TEXT: Array de seções com texto melhorado e estruturado
+4. SUGGESTIONS: Array de sugestões de melhoria DETALHADAS (mínimo 3 sugestões, focadas em grandes volumes de conteúdo)
+5. QUIZ: Array de 8-15 questões de múltipla escolha sobre o conteúdo (mais questões para livros, com explicações detalhadas)
+6. IMPROVED_TEXT: Array de seções com texto melhorado e estruturado (organizado por capítulos/seções, com conteúdo EXTENSO)
 7. META: Metadados adicionais (rawId, adaptedId)
+
+DIRETRIZES PARA CONTEÚDO EXTENSO:
+- Seja detalhado e abrangente em todas as seções
+- Gere explicações completas e exemplos práticos
+- Crie conteúdo rico e educativo
+- Não economize em palavras - seja generoso com informações
 
 Retorne APENAS o JSON válido no seguinte formato:
 {

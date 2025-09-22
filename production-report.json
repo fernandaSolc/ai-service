@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-09-22T01:47:30.747Z",
+  "environment": "development",
+  "port": 3005,
+  "hasEnvFile": true,
+  "hasDistFolder": true,
+  "openaiConfigured": false,
+  "jwtConfigured": false,
+  "apiKeyConfigured": false,
+  "corsConfigured": false,
+  "metricsEnabled": false
+}

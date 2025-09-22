@@ -94,9 +94,16 @@ export class LoggingService {
    * Extrai contexto de uma requisição HTTP
    */
   extractRequestContext(req: any): LogContext {
+    if (!req) {
+      return {
+        requestId: this.generateRequestId(),
+        userId: 'unknown',
+      };
+    }
+    
     return {
-      requestId: req.headers['x-request-id'] || this.generateRequestId(),
-      userId: req.user?.id || req.headers['x-user-id'],
+      requestId: req.headers?.['x-request-id'] || this.generateRequestId(),
+      userId: req.user?.id || req.headers?.['x-user-id'] || 'unknown',
     };
   }
 }

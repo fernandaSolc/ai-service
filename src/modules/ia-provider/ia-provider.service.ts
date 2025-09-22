@@ -2,6 +2,10 @@ import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
 import { ExecutionMetadataDto } from '../../common/dto';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
 
 export interface IaResponse {
   content: string;
@@ -14,17 +18,25 @@ export class IaProviderService {
   private openai: OpenAI;
 
   constructor(private configService: ConfigService) {
-    const apiKey = this.configService.get<string>('OPENAI_API_KEY');
+    // Teste com dotenv direto
+    const apiKeyDotenv = process.env.OPENAI_API_KEY;
+    const apiKeyConfig = this.configService.get<string>('OPENAI_API_KEY');
+    
+    console.log('🔍 DEBUG - apiKeyDotenv:', apiKeyDotenv ? 'ENCONTRADA' : 'NÃO ENCONTRADA');
+    console.log('🔍 DEBUG - apiKeyConfig:', apiKeyConfig ? 'ENCONTRADA' : 'NÃO ENCONTRADA');
+    
+    const apiKey = apiKeyConfig || apiKeyDotenv;
     if (!apiKey) {
       throw new Error('OPENAI_API_KEY não encontrada nas variáveis de ambiente');
     }
 
     this.openai = new OpenAI({
       apiKey,
-      timeout: 600000,
+      timeout: 300000, 
       maxRetries: 3,
     });
   }
+
 
   /**
    * Envia prompt para a IA e retorna resposta
@@ -40,13 +52,15 @@ export class IaProviderService {
     const startTime = Date.now();
     
     try {
+      // Parâmetros otimizados para grandes livros e conteúdo extenso
       const model = options?.model || 'gpt-4o-mini';
-      const maxTokens = options?.maxTokens || 2000;
-      const temperature = options?.temperature || 0.2;
+      const maxTokens = options?.maxTokens || 8000; // Aumentado para grandes livros
+      const temperature = options?.temperature || 0.2; // Baixa criatividade para consistência
 
       this.logger.log(`Enviando prompt para ${model} com ${maxTokens} tokens máximos`);
 
-      const completion = await this.openai.chat.completions.create({
+      // Configuração baseada no modelo
+      const requestConfig: any = {
         model,
         messages: [
           {
@@ -60,8 +74,18 @@ export class IaProviderService {
         ],
         max_tokens: maxTokens,
         temperature,
-        response_format: { type: 'json_object' }, // Força resposta em JSON
-      });
+        top_p: 0.9, // Mantém diversidade sem perder foco
+        presence_penalty: 0.1, // Evita repetição de termos
+        frequency_penalty: 0.1, // Reduz redundância
+        n: 1, // Gera uma única versão (mais econômico)
+      };
+
+      // Adicionar response_format apenas para modelos que suportam
+      if (model.includes('gpt-4o') || model.includes('gpt-4-turbo')) {
+        requestConfig.response_format = { type: 'json_object' };
+      }
+
+      const completion = await this.openai.chat.completions.create(requestConfig);
 
       const content = completion.choices[0]?.message?.content;
       if (!content) {
@@ -69,8 +93,10 @@ export class IaProviderService {
       }
 
       const latencyMs = Date.now() - startTime;
+      
+      // Usar tokens reais da resposta da OpenAI quando disponível
       const tokensIn = completion.usage?.prompt_tokens || this.estimateTokens(prompt);
-      const tokensOut = completion.usage?.completion_tokens || 0;
+      const tokensOut = completion.usage?.completion_tokens || this.estimateTokens(content);
       const costUsd = this.calculateCost(model, tokensIn, tokensOut);
 
       this.logger.log(`Resposta recebida em ${latencyMs}ms, tokens: ${tokensIn} in, ${tokensOut} out`);

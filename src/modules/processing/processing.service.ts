@@ -53,9 +53,9 @@ export class ProcessingService {
 
       // 5. Enviar para IA
       const iaResponse = await this.iaProviderService.processPrompt(prompt, {
-        maxTokens: request.options?.maxResponseTokens || 2000,
+        maxTokens: request.options?.maxResponseTokens || 8000,
         temperature: request.options?.temperature || 0.2,
-        model: request.options?.modelHint || 'gpt-4o',
+        model: request.options?.modelHint || 'gpt-4o-mini',
       });
 
       // 6. Validar e corrigir resposta se necessário
@@ -66,9 +66,9 @@ export class ProcessingService {
           this.getExpectedSchema()
         ),
         {
-          maxTokens: 1000,
+          maxTokens: 2000, // Aumentado para correções de grandes livros
           temperature: 0.1,
-          model: request.options?.modelHint || 'gpt-4o',
+          model: request.options?.modelHint || 'gpt-4o-mini',
         }
       );
 
