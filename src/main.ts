@@ -64,8 +64,8 @@ async function bootstrap() {
   // Configurar prefixo global
   app.setGlobalPrefix('v1');
 
-  const port = process.env.PORT || 3005;
-  await app.listen(port);
+  const port = 3000; // porta padrão fixa
+  await app.listen(port, '0.0.0.0'); // garante bind no container
 
   logger.log(`🚀 ia-service rodando na porta ${port}`);
   logger.log(`📚 Documentação disponível em http://localhost:${port}/api`);
