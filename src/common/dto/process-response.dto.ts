@@ -57,27 +57,103 @@ export class WorkflowMetaDto {
   adaptedId?: string;
 }
 
+export class ChapterDto {
+  @ApiProperty({ description: 'ID do capítulo' })
+  id: number;
+
+  @ApiProperty({ description: 'Título do capítulo' })
+  title: string;
+
+  @ApiProperty({ description: 'Conteúdo do capítulo' })
+  content: string;
+
+  @ApiProperty({ description: 'Objetivos de aprendizagem do capítulo', type: [String] })
+  learningObjectives: string[];
+
+  @ApiProperty({ description: 'Atividades do capítulo', type: [String] })
+  activities: string[];
+
+  @ApiProperty({ description: 'Critérios de avaliação', type: [String] })
+  evaluationCriteria: string[];
+
+  @ApiProperty({ description: 'Exemplos práticos', type: [String] })
+  practicalExamples: string[];
+
+  @ApiProperty({ description: 'Recursos adicionais', type: [String] })
+  resources: string[];
+
+  @ApiProperty({ description: 'Duração estimada em minutos' })
+  estimatedDuration: number;
+}
+
+export class QualityMetricsDto {
+  @ApiProperty({ description: 'Score de qualidade (0-100)' })
+  qualityScore: number;
+
+  @ApiProperty({ description: 'Log de processamento' })
+  processingLog: any;
+
+  @ApiProperty({ description: 'Resultado detalhado' })
+  result: any;
+
+  @ApiProperty({ description: 'Sugestões de melhoria', type: [String] })
+  suggestions: string[];
+
+  @ApiProperty({ description: 'Modelo utilizado' })
+  model: string;
+}
+
 export class WorkflowFrontendPayloadDto {
-  @ApiProperty({ description: 'Resumo curto para exibição' })
-  summary: string;
+  @ApiProperty({ description: 'Indica se o processamento foi bem-sucedido' })
+  success: boolean;
 
-  @ApiProperty({ description: 'Métricas do conteúdo' })
-  metrics: MetricsDto;
+  @ApiProperty({ description: 'Capítulos gerados', type: [ChapterDto] })
+  chapters: ChapterDto[];
 
-  @ApiProperty({ description: 'Violações encontradas', type: [ViolationDto] })
-  violations: ViolationDto[];
+  @ApiProperty({ description: 'Métricas de qualidade' })
+  qualityScore: number;
 
-  @ApiProperty({ description: 'Sugestões de melhoria', type: [SuggestionDto] })
-  suggestions: SuggestionDto[];
+  @ApiProperty({ description: 'Log de processamento' })
+  processingLog: any;
 
-  @ApiProperty({ description: 'Questões geradas', type: [QuizDto] })
-  quiz: QuizDto[];
+  @ApiProperty({ description: 'Resultado detalhado' })
+  result: any;
 
-  @ApiProperty({ description: 'Texto revisado, dividido por seção', type: [ImprovedTextSectionDto] })
-  improvedText: ImprovedTextSectionDto[];
+  @ApiProperty({ description: 'Métricas de IA (tokens, latência, custo)' })
+  metrics: {
+    tokensIn: number;
+    tokensOut: number;
+    latencyMs: number;
+    costUsd: number;
+  };
 
-  @ApiProperty({ description: 'Metadados do workflow' })
-  meta: WorkflowMetaDto;
+  @ApiProperty({ description: 'Sugestões de melhoria', type: [String] })
+  suggestions: string[];
+
+  @ApiProperty({ description: 'Modelo utilizado' })
+  model: string;
+
+  // Campos legados para compatibilidade
+  @ApiPropertyOptional({ description: 'Resumo curto para exibição - LEGADO' })
+  summary?: string;
+
+  @ApiPropertyOptional({ description: 'Métricas do conteúdo - LEGADO' })
+  legacyMetrics?: MetricsDto;
+
+  @ApiPropertyOptional({ description: 'Violações encontradas - LEGADO', type: [ViolationDto] })
+  violations?: ViolationDto[];
+
+  @ApiPropertyOptional({ description: 'Questões geradas - LEGADO', type: [QuizDto] })
+  quiz?: QuizDto[];
+
+  @ApiPropertyOptional({ description: 'Texto revisado, dividido por seção - LEGADO', type: [ImprovedTextSectionDto] })
+  improvedText?: ImprovedTextSectionDto[];
+
+  @ApiPropertyOptional({ description: 'Metadados do workflow - LEGADO' })
+  meta?: WorkflowMetaDto;
+
+  @ApiPropertyOptional({ description: 'Livro completo gerado (outline + capítulos) - LEGADO' })
+  book?: any;
 }
 
 export class ExecutionMetadataDto {

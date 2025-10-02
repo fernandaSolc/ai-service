@@ -28,7 +28,7 @@ export class QueueProcessor extends WorkerHost {
 
   async process(job: Job<QueueJobData>): Promise<any> {
     const { workflowId, request, callbackUrl } = job.data;
-    
+
     this.logger.log(`Processando conteúdo para workflowId: ${workflowId}`);
 
     try {
@@ -41,11 +41,16 @@ export class QueueProcessor extends WorkerHost {
 
       // 1. Validar payload
       this.validationService.validateProcessRequest(request);
-      this.validationService.validatePolicy(request.policy);
+      if (request.policy) {
+        this.validationService.validatePolicy(request.policy);
+      }
 
-      // 2. Sanitizar texto
-      const sanitizedText = this.validationService.sanitizeText(request.text);
-      const sanitizedRequest = { ...request, text: sanitizedText };
+      // 2. Sanitizar texto se disponível
+      let sanitizedRequest = { ...request };
+      if (request.text) {
+        const sanitizedText = this.validationService.sanitizeText(request.text);
+        sanitizedRequest = { ...request, text: sanitizedText };
+      }
 
       // 3. Salvar registro inicial
       await this.persistenceService.saveInitialExecution(
@@ -121,18 +126,18 @@ export class QueueProcessor extends WorkerHost {
           payload: result.payload,
           execution: result.execution,
         });
-        
+
         job.progress = 90;
       }
 
       job.progress = 100;
-      
+
       this.logger.log(`Conteúdo processado com sucesso para workflowId: ${workflowId}`);
-      
+
       return result;
     } catch (error) {
       this.logger.error(`Erro ao processar conteúdo para workflowId: ${workflowId}`, error);
-      
+
       // Salvar erro
       await this.persistenceService.updateExecutionStatus(
         request.workflowId,
@@ -141,7 +146,7 @@ export class QueueProcessor extends WorkerHost {
         undefined,
         error.message
       );
-      
+
       // Enviar callback de erro se fornecido
       if (callbackUrl) {
         try {
@@ -154,7 +159,7 @@ export class QueueProcessor extends WorkerHost {
           this.logger.error('Erro ao enviar callback de erro:', callbackError);
         }
       }
-      
+
       throw error;
     }
   }

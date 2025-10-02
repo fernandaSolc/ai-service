@@ -6,12 +6,26 @@ import { LoggingInterceptor } from './modules/logging/logging.interceptor';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
-  
+
   const app = await NestFactory.create(AppModule);
-  
+
+  // Configurar limite de payload para 10MB
+  app.use(require('express').json({ limit: '10mb' }));
+  app.use(require('express').urlencoded({ limit: '10mb', extended: true }));
+
+  // Configurar timeout para processamento de arquivos grandes
+  app.use((req, res, next) => {
+    // Timeout de 5 minutos para requisições com PDFs
+    if (req.body && (req.body.pdfBibliographies || req.body.bibliographies)) {
+      req.setTimeout(300000); // 5 minutos
+      res.setTimeout(300000); // 5 minutos
+    }
+    next();
+  });
+
   // Configurar CORS
   app.enableCors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:3005'],
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:3005', 'http://localhost:3001'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
   });
@@ -52,7 +66,7 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3005;
   await app.listen(port);
-  
+
   logger.log(`🚀 ia-service rodando na porta ${port}`);
   logger.log(`📚 Documentação disponível em http://localhost:${port}/api`);
   logger.log(`🏥 Health check disponível em http://localhost:${port}/v1/health`);

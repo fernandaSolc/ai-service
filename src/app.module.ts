@@ -9,6 +9,7 @@ import { HealthModule } from './modules/health/health.module';
 import { MetricsModule } from './modules/metrics/metrics.module';
 import { LoggingModule } from './modules/logging/logging.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { PdfProcessorModule } from './modules/pdf-processor/pdf-processor.module';
 import { ThrottlerGuard } from '@nestjs/throttler';
 
 @Module({
@@ -28,6 +29,7 @@ import { ThrottlerGuard } from '@nestjs/throttler';
     ProcessingModule,
     HealthModule,
     MetricsModule,
+    PdfProcessorModule,
   ],
   controllers: [AppController],
   providers: [
@@ -38,4 +40,4 @@ import { ThrottlerGuard } from '@nestjs/throttler';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
