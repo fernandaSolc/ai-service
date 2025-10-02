@@ -1,23 +1,26 @@
-# Usa imagem Node LTS oficial
 FROM node:20-alpine
 
-# Define diretório de trabalho
+# utilitários necessários p/ healthcheck e possíveis builds
+RUN apk add --no-cache curl
+
 WORKDIR /app
 
-# Copia package.json e package-lock.json primeiro para otimizar cache
+# Copia manifests primeiro p/ cache
 COPY package*.json ./
 
-# Instala dependências
-RUN npm install --production
+# Se houver package-lock.json use npm ci, senão use npm install
+# Ambas com --omit=dev e --legacy-peer-deps para contornar ERESOLVE
+RUN if [ -f package-lock.json ]; then \
+      npm ci --omit=dev --legacy-peer-deps; \
+    else \
+      npm install --omit=dev --legacy-peer-deps; \
+    fi
 
-# Copia o restante do código
+# Copia código
 COPY . .
 
-# Variável de ambiente padrão
-ENV PORT=3000
+ENV NODE_ENV=production
+ENV PORT=3003
+EXPOSE 3003
 
-# Expõe porta interna
-EXPOSE 3000
-
-# Comando padrão para iniciar a aplicação
 CMD ["npm", "start"]
