@@ -6,13 +6,13 @@ services:
     container_name: ai-service
     restart: unless-stopped
     env_file:
-      - .env
+      - .env         # gerado pelo deploy_aiservice.sh
     ports:
-      - "3003:3000"       # host:container
+      - "3003:3000"  # host:container
     networks:
       - pdinfinita_network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      test: ["CMD", "curl", "-sf", "http://localhost:3000/v1/health"]
       interval: 30s
       timeout: 10s
       retries: 3
