@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  ai-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai-service
+    restart: unless-stopped
+    # Carrega SOMENTE estas variáveis do arquivo (não interpolam no compose)
+    env_file:
+      - ./aiservice_env
+    # Mapeia porta host:container (host 3003 -> container 3005, conforme seu env)
+    ports:
+      - "3003:3000"
+    networks:
+      - pdinfinita_network
+
+networks:
+  pdinfinita_network:
+    external: true
